@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getCloudinaryImageUrl } from "@/lib/cloudinary/url";
 import { ALL_CATEGORIES, getCategoryLabel } from "@/lib/categories";
@@ -212,17 +213,19 @@ export default async function HomePage() {
     { label: "Loder", emoji: "\u26CF\uFE0F", bg: "#fce4ec", value: "loder-yukleyici" },
     { label: "Transmikser", emoji: "\u{1F3ED}", bg: "#e8eaf6", value: "transmikser" },
   ];
-  const supabase = createSupabaseServerClient();
-  const categoryCounts = await Promise.all(
-    categoryCards.map(async (category) => {
-      const { count } = await supabase
-        .from("listings")
-        .select("id", { count: "exact", head: true })
-        .eq("is_active", true)
-        .eq("category", category.value);
-      return { ...category, count: count ?? 0 };
-    }),
-  );
+  const categoryCounts = isSupabaseConfigured()
+    ? await Promise.all(
+        categoryCards.map(async (category) => {
+          const supabase = createSupabaseServerClient();
+          const { count } = await supabase
+            .from("listings")
+            .select("id", { count: "exact", head: true })
+            .eq("is_active", true)
+            .eq("category", category.value);
+          return { ...category, count: count ?? 0 };
+        }),
+      )
+    : categoryCards.map((category) => ({ ...category, count: 0 }));
 
   return (
     <main className="home-page">

@@ -6,6 +6,7 @@ import { Analytics } from "@vercel/analytics/react";
 import { Toaster } from "sonner";
 import TopLoader from "@/components/TopLoader";
 import "./globals.css";
+import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import UnreadBadge from "@/components/UnreadBadge";
 import Footer from "@/components/Footer";
@@ -50,9 +51,12 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const supabase = createSupabaseServerClient();
-  const { data } = await supabase.auth.getUser();
-  const isLoggedIn = Boolean(data.user);
+  let isLoggedIn = false;
+  if (isSupabaseConfigured()) {
+    const supabase = createSupabaseServerClient();
+    const { data } = await supabase.auth.getUser();
+    isLoggedIn = Boolean(data.user);
+  }
 
   async function signOut() {
     "use server";
