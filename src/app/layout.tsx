@@ -52,10 +52,19 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   let isLoggedIn = false;
+  let isAdmin = false;
   if (isSupabaseConfigured()) {
     const supabase = createSupabaseServerClient();
     const { data } = await supabase.auth.getUser();
     isLoggedIn = Boolean(data.user);
+    if (data.user) {
+      const { data: adminRow } = await supabase
+        .from("profiles")
+        .select("is_admin")
+        .eq("id", data.user.id)
+        .single();
+      isAdmin = Boolean(adminRow?.is_admin);
+    }
   }
 
   async function signOut() {
@@ -111,6 +120,11 @@ export default async function RootLayout({
               {isLoggedIn ? (
                 <>
                   <UnreadBadge />
+                  {isAdmin ? (
+                    <Link href="/admin" className="site-nav-link">
+                      Yönetim
+                    </Link>
+                  ) : null}
                   <Link href="/hesabim" className="site-nav-link">
                     Hesabım
                   </Link>
@@ -148,6 +162,11 @@ export default async function RootLayout({
             <Link href="/magazalar" className="site-mobile-quick-nav-link">
               Mağazalar
             </Link>
+            {isAdmin ? (
+              <Link href="/admin" className="site-mobile-quick-nav-link">
+                Yönetim
+              </Link>
+            ) : null}
           </nav>
         </header>
         <div id="main-content">{children}</div>

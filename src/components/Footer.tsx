@@ -5,7 +5,7 @@ import Link from "next/link";
 
 export default function Footer() {
   const pathname = usePathname();
-  if (pathname.startsWith("/ilan-ver")) return null;
+  if (pathname.startsWith("/ilan-ver") || pathname.startsWith("/admin")) return null;
 
   return (
     <footer className="site-footer">

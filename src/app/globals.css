@@ -72,6 +72,12 @@ h4 {
   backdrop-filter: blur(12px);
 }
 
+body:has([data-admin-layout]) .site-header,
+body:has([data-admin-layout]) .site-search-mobile,
+body:has([data-admin-layout]) .site-mobile-quick-nav {
+  display: none;
+}
+
 .site-header-inner {
   height: 68px;
   width: min(1280px, calc(100% - 32px));

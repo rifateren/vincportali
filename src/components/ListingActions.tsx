@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 
 type ListingActionsProps = {
@@ -26,8 +27,11 @@ export default function ListingActions({
       .update({ is_active: !isActive })
       .eq("id", listingId);
 
-    if (!error) {
+    if (error) {
+      toast.error(error.message || "Durum güncellenemedi.");
+    } else {
       setIsActive(!isActive);
+      toast.success(isActive ? "İlan pasife alındı." : "İlan yayına alındı.");
       router.refresh();
     }
     setLoading(false);
@@ -40,7 +44,10 @@ export default function ListingActions({
       .delete()
       .eq("id", listingId);
 
-    if (!error) {
+    if (error) {
+      toast.error(error.message || "İlan silinemedi.");
+    } else {
+      toast.success("İlan silindi.");
       router.refresh();
     }
     setLoading(false);

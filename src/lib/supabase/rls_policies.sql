@@ -40,6 +40,33 @@ for delete
 to authenticated
 using (auth.uid() = user_id);
 
+drop policy if exists "Admins can select all listings" on public.listings;
+create policy "Admins can select all listings"
+on public.listings
+for select
+to authenticated
+using (
+  auth.uid() in (select id from public.profiles where is_admin = true)
+);
+
+drop policy if exists "Admins can update any listing" on public.listings;
+create policy "Admins can update any listing"
+on public.listings
+for update
+to authenticated
+using (
+  auth.uid() in (select id from public.profiles where is_admin = true)
+);
+
+drop policy if exists "Admins can delete any listing" on public.listings;
+create policy "Admins can delete any listing"
+on public.listings
+for delete
+to authenticated
+using (
+  auth.uid() in (select id from public.profiles where is_admin = true)
+);
+
 alter table public.profiles enable row level security;
 
 drop policy if exists "Users can view own profile" on public.profiles;
@@ -59,6 +86,14 @@ create policy "Users can insert own profile"
 on public.profiles
 for insert
 with check (auth.uid() = id);
+
+drop policy if exists "Admins can view all profiles" on public.profiles;
+create policy "Admins can view all profiles"
+on public.profiles
+for select
+using (
+  auth.uid() in (select id from public.profiles where is_admin = true)
+);
 
 -- Matches migration 004 (security definer view counter).
 create or replace function public.increment_listing_view_count(listing_id uuid)
